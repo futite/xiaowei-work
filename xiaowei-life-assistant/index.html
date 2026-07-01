@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小薇生活助手｜Flight Agent Demo</title>
+  <style>
+    :root {
+      --orange: #ff6900;
+      --orange-deep: #e85f00;
+      --orange-soft: #fff3e8;
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #171717;
+      --sub: #767676;
+      --line: #eeeeee;
+      --green: #73b72b;
+      --green-soft: #f0f9eb;
+      --red: #ef4444;
+      --shadow: 0 14px 34px rgba(20, 20, 20, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(255,105,0,.16), transparent 32%),
+        radial-gradient(circle at 84% 90%, rgba(255,105,0,.09), transparent 34%),
+        linear-gradient(135deg, #eef1f5 0%, #ffffff 46%, #f7efe8 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC",
+        "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      padding: 28px 12px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      border: 8px solid #111;
+      border-radius: 42px;
+      overflow: hidden;
+      background: var(--bg);
+      box-shadow: 0 30px 90px rgba(0,0,0,.26);
+      position: relative;
+    }
+
+    .status {
+      height: 44px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(18px);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .icons { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+
+    .battery {
+      width: 28px;
+      height: 13px;
+      border: 2px solid #111;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      right: -5px;
+      top: 3px;
+      width: 3px;
+      height: 5px;
+      background: #111;
+      border-radius: 2px;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 18px;
+      height: 5px;
+      background: #111;
+      border-radius: 2px;
+    }
+
+    .screen {
+      height: calc(100% - 44px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page {
+      height: 100%;
+      padding: 22px 20px 26px;
+      display: none;
+      flex-direction: column;
+      animation: show .2s ease;
+    }
+
+    .page.active { display: flex; }
+
+    @keyframes show {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff8a3d, #b56cff);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 900;
+      font-family: "STKaiti", "KaiTi", "Songti SC", serif;
+      box-shadow: 0 10px 20px rgba(181,108,255,.20);
+    }
+
+    .brand-text { line-height: 1.2; }
+    .brand-text b { display: block; font-size: 16px; }
+    .brand-text span { color: var(--sub); font-size: 12px; }
+
+    .chip {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      color: #555;
+      font-weight: 800;
+    }
+
+    h1, h2 { margin: 0; color: var(--text); letter-spacing: -0.4px; }
+    h1 { font-size: 29px; line-height: 1.15; }
+    h2 { font-size: 25px; line-height: 1.2; }
+
+    .sub {
+      margin: 9px 0 0;
+      color: var(--sub);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .quick-input, .goal-card, .confirm-list, .final-card, .rule-card, .judge-card, .explain-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,.04);
+    }
+
+    .quick-input {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 26px;
+    }
+
+    .input-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .input-title span {
+      color: var(--orange);
+      font-size: 12px;
+      background: var(--orange-soft);
+      padding: 5px 8px;
+      border-radius: 999px;
+    }
+
+    .input-box {
+      width: 100%;
+      min-height: 86px;
+      resize: none;
+      border-radius: 18px;
+      background: #f6f7f9;
+      border: 1px solid #ececec;
+      padding: 14px;
+      color: #333;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.55;
+      outline: none;
+    }
+
+    .input-box:focus {
+      border-color: rgba(255,105,0,.55);
+      background: #fff;
+    }
+
+    .rule-card {
+      margin-top: 14px;
+      padding: 14px;
+      background: #f6f7f9;
+      box-shadow: none;
+      border: 1px solid #eeeeee;
+    }
+
+    .rule-card b {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 8px;
+    }
+
+    .rule-card p {
+      margin: 0;
+      color: #777;
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin: 20px 0 10px;
+    }
+
+    .section-head b { font-size: 14px; }
+    .section-head span { color: #999; font-size: 11px; }
+
+    .scene-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .scene-card {
+      min-height: 76px;
+      padding: 13px;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 10px 22px rgba(0,0,0,.045);
+      border: 1px solid #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .scene-card b { font-size: 14px; }
+    .scene-card small { color: #888; font-size: 11px; line-height: 1.35; }
+
+    .button-area {
+      margin-top: auto;
+      padding-bottom: 8px;
+    }
+
+    button {
+      width: 100%;
+      height: 52px;
+      border-radius: 26px;
+      border: none;
+      background: var(--orange);
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 14px 24px rgba(255,105,0,.25);
+      transition: .12s ease;
+    }
+
+    button:hover { background: var(--orange-deep); }
+    button:active { transform: scale(.98); }
+
+    .ghost-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .ghost {
+      background: #fff;
+      color: #444;
+      border: 1px solid var(--line);
+      box-shadow: none;
+      font-weight: 800;
+    }
+
+    .judge-card {
+      margin-top: 22px;
+      padding: 18px;
+    }
+
+    .judge-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 22px;
+      background: var(--green);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 40px;
+      font-weight: 900;
+      box-shadow: 0 14px 26px rgba(115,183,43,.24);
+      margin-bottom: 14px;
+    }
+
+    .judge-title {
+      font-size: 21px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .judge-desc {
+      color: #777;
+      font-size: 13px;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .judge-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .judge-row {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      padding: 10px 11px;
+      border-radius: 16px;
+      background: #f7f8fa;
+      font-size: 12.5px;
+      color: #555;
+      line-height: 1.45;
+    }
+
+    .judge-row span:first-child {
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .goal-card {
+      margin-top: 22px;
+      padding: 18px;
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .goal-text {
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+
+    .detected {
+      margin-top: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .detected-item {
+      padding: 12px;
+      border-radius: 17px;
+      background: #f6f7f9;
+    }
+
+    .detected-item small { color: #888; font-size: 11px; }
+    .detected-item b { display: block; margin-top: 4px; font-size: 13px; }
+
+    .soft-notice {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-size: 12.5px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .explain-card {
+      margin-top: 14px;
+      padding: 14px;
+      box-shadow: 0 9px 22px rgba(0,0,0,.052);
+    }
+
+    .explain-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 9px;
+    }
+
+    .explain-title span {
+      color: var(--green);
+      background: var(--green-soft);
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+
+    .explain-card p {
+      margin: 0;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .plan-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .plan-card {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 11px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid #f0f0f0;
+      box-shadow: 0 9px 22px rgba(0,0,0,.052);
+    }
+
+    .plan-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      background: var(--orange-soft);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+    }
+
+    .plan-card b {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .plan-card small {
+      display: block;
+      color: var(--sub);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .edit-tag {
+      color: var(--orange);
+      background: var(--orange-soft);
+      border-radius: 999px;
+      padding: 4px 7px;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .custom-add-card {
+      margin-top: 11px;
+      padding: 13px 14px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1.5px dashed rgba(255,105,0,.38);
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 9px 22px rgba(0,0,0,.035);
+      cursor: pointer;
+    }
+
+    .custom-add-card span { color: #999; font-size: 12px; font-weight: 700; }
+
+    .permission-line {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .permission-line span {
+      font-size: 11px;
+      color: #666;
+      background: #fff;
+      border: 1px solid #eeeeee;
+      padding: 5px 8px;
+      border-radius: 999px;
+    }
+
+    .confirm-list {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 24px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,.04);
+    }
+
+    .confirm-row {
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 9px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .confirm-row:last-child { border-bottom: none; }
+
+    .tick {
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      background: var(--orange);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 900;
+      margin-top: 1px;
+    }
+
+    .confirm-row b { display: block; font-size: 13.5px; margin-bottom: 4px; }
+    .confirm-row small { color: #777; font-size: 12px; line-height: 1.35; }
+
+    .tag {
+      margin-top: 1px;
+      color: #888;
+      background: #f6f7f9;
+      border-radius: 999px;
+      padding: 4px 7px;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .final-hero {
+      margin-top: 20px;
+      padding: 22px 18px;
+      border-radius: 30px;
+      background:
+        linear-gradient(135deg, rgba(115,183,43,.96), rgba(130,198,58,.90));
+      color: #fff;
+      box-shadow: 0 18px 38px rgba(115,183,43,.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-hero::after {
+      content: "";
+      position: absolute;
+      right: -52px;
+      top: -62px;
+      width: 150px;
+      height: 150px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+    }
+
+    .final-check {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.22);
+      display: grid;
+      place-items: center;
+      font-size: 38px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-hero b {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 7px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-hero p {
+      margin: 0;
+      color: rgba(255,255,255,.9);
+      font-size: 13px;
+      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+    }
+
+    .next-card {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.04);
+      box-shadow: var(--shadow);
+    }
+
+    .next-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .next-title span { color: #999; font-size: 11px; font-weight: 700; }
+
+    .next-row {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f2f2f2;
+    }
+
+    .next-row:last-child { border-bottom: none; }
+
+    .next-time {
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 900;
+      padding-top: 1px;
+    }
+
+    .next-row b { display: block; font-size: 13.5px; margin-bottom: 3px; }
+    .next-row small { color: #777; font-size: 12px; line-height: 1.35; }
+
+    .manage-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .manage-card {
+      padding: 13px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid #eeeeee;
+      text-align: center;
+      color: #555;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+
+    .judge-hero {
+      margin-top: 20px;
+      padding: 22px 18px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, rgba(115,183,43,.96), rgba(130,198,58,.90));
+      color: #fff;
+      box-shadow: 0 18px 38px rgba(115,183,43,.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .judge-hero::after {
+      content: "";
+      position: absolute;
+      right: -50px;
+      top: -62px;
+      width: 150px;
+      height: 150px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+    }
+
+    .judge-hero-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.22);
+      display: grid;
+      place-items: center;
+      font-size: 38px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .judge-hero b {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 7px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .judge-hero p {
+      margin: 0;
+      color: rgba(255,255,255,.9);
+      font-size: 13px;
+      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+    }
+
+    .judge-status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .judge-status {
+      padding: 13px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid #eeeeee;
+      box-shadow: 0 8px 18px rgba(0,0,0,.04);
+    }
+
+    .judge-status strong {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 4px;
+    }
+
+    .judge-status span {
+      color: #777;
+      font-size: 11.5px;
+      line-height: 1.35;
+    }
+
+    .judge-bottom-note {
+      margin-top: 12px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-size: 12.5px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .plan-explain-compact {
+      margin-top: 13px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: #fff3e8;
+      color: var(--orange);
+      font-size: 12.5px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .timeline-list {
+      margin-top: 12px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 46px 1fr auto;
+      gap: 10px;
+      padding: 11px;
+      border-radius: 19px;
+      background: #fff;
+      border: 1px solid #f0f0f0;
+      box-shadow: 0 9px 22px rgba(0,0,0,.052);
+    }
+
+    .timeline-time {
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 900;
+      padding-top: 2px;
+    }
+
+    .timeline-item b {
+      display: block;
+      font-size: 13.8px;
+      margin-bottom: 4px;
+    }
+
+    .timeline-item small {
+      display: block;
+      color: #777;
+      font-size: 11.8px;
+      line-height: 1.35;
+    }
+
+    .timeline-item .edit-tag {
+      margin-top: 0;
+      align-self: start;
+    }
+
+    .compact-permission-line {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .compact-permission-line span {
+      font-size: 10.5px;
+      color: #666;
+      background: #fff;
+      border: 1px solid #eeeeee;
+      padding: 5px 8px;
+      border-radius: 999px;
+    }
+
+    .compact-add {
+      margin-top: 10px;
+      padding: 12px 14px;
+    }
+
+
+    .home-scene-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .home-scene-card {
+      min-height: 54px;
+      padding: 10px 12px;
+      border-radius: 17px;
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(0,0,0,.04);
+      border: 1px solid #f0f0f0;
+    }
+
+    .home-scene-card b {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 3px;
+    }
+
+    .home-scene-card small {
+      color: #888;
+      font-size: 10.5px;
+      line-height: 1.25;
+    }
+
+    .back-row {
+      margin-bottom: 12px;
+    }
+
+    .back-btn {
+      width: auto;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #fff;
+      color: #555;
+      border: 1px solid #eeeeee;
+      box-shadow: none;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .back-btn:hover {
+      background: #f3f3f3;
+    }
+
+
+    .button-area .ghost-row + button {
+      margin-top: 10px;
+    }
+
+    .task-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .task-menu-button {
+      width: auto;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--orange);
+      border: 1px solid rgba(255,105,0,.28);
+      box-shadow: none;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .task-menu-button:hover {
+      background: var(--orange-soft);
+    }
+
+    .task-directory {
+      position: absolute;
+      top: 62px;
+      right: 20px;
+      width: 260px;
+      padding: 14px;
+      border-radius: 22px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.06);
+      box-shadow: 0 18px 45px rgba(0,0,0,.16);
+      z-index: 35;
+      display: none;
+    }
+
+    .task-directory.show {
+      display: block;
+    }
+
+    .task-directory-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .task-directory-title span {
+      color: #999;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .task-progress-item {
+      padding: 9px 0;
+      border-bottom: 1px solid #f1f1f1;
+    }
+
+    .task-progress-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-progress-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #444;
+      font-weight: 800;
+    }
+
+    .task-progress-top span {
+      color: var(--orange);
+      font-size: 11px;
+      flex: 0 0 auto;
+    }
+
+    .progress-track {
+      height: 6px;
+      border-radius: 999px;
+      background: #f1f1f1;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--orange);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s;
+      z-index: 30;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sheet {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 14px;
+      padding: 18px;
+      border-radius: 26px;
+      background: #fff;
+      box-shadow: 0 -16px 40px rgba(0,0,0,.18);
+      transform: translateY(120%);
+      transition: .24s ease;
+      z-index: 31;
+    }
+
+    .sheet.show { transform: translateY(0); }
+
+    .sheet h3 { margin: 0 0 6px; font-size: 18px; }
+
+    .sheet p {
+      margin: 0 0 12px;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .sheet-input {
+      width: 100%;
+      min-height: 76px;
+      resize: none;
+      border: 1px solid #eeeeee;
+      border-radius: 18px;
+      background: #f7f8fa;
+      padding: 13px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      line-height: 1.45;
+    }
+
+    .sheet-input:focus {
+      border-color: rgba(255,105,0,.55);
+      background: #fff;
+    }
+
+    .sheet-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .sheet-actions button { height: 46px; font-size: 14px; }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 98px;
+      transform: translateX(-50%) translateY(18px);
+      background: rgba(0,0,0,.78);
+      color: #fff;
+      padding: 10px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      opacity: 0;
+      transition: .2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 40;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .home-indicator {
+      width: 130px;
+      height: 5px;
+      border-radius: 999px;
+      background: #111;
+      position: absolute;
+      left: 50%;
+      bottom: 9px;
+      transform: translateX(-50%);
+      opacity: .95;
+    }
+
+    @media (max-width: 430px) {
+      body { padding: 0; background: #111; }
+
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="phone">
+    <div class="status">
+      <span>13:45</span>
+      <div class="icons">
+        <span>5G</span>
+        <span>▮▮▮</span>
+        <span class="battery"></span>
+      </div>
+    </div>
+
+    <div class="screen">
+      <section class="page active" id="home">
+        <div class="nav">
+          <div class="brand">
+            <div class="logo">薇</div>
+            <div class="brand-text">
+              <b>小薇生活助手</b>
+              <span>智能生活助手</span>
+            </div>
+          </div>
+          <button class="task-menu-button" onclick="toggleHomeTaskDirectory()">任务目录</button>
+        </div>
+
+        <div class="task-directory" id="homeTaskDirectory">
+          <div class="task-directory-title">
+            当前任务
+            <span>4 项</span>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>起床与天气提醒</b>
+              <span>100%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 100%;"></div></div>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>路线与车机准备</b>
+              <span>80%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 80%;"></div></div>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>离家模式待执行</b>
+              <span>60%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 60%;"></div></div>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>小爱语音提醒</b>
+              <span>70%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 70%;"></div></div>
+          </div>
+        </div>
+
+        <h1>今天想安排<br />什么生活任务？</h1>
+        <p class="sub">说出目标，我会先判断是否清晰、安全，再整理成可修改的计划。</p>
+
+        <div class="quick-input">
+          <div class="input-title">
+            请输入你的目标
+            <span>先判断再安排</span>
+          </div>
+          <textarea class="input-box" id="userTaskInput">我明天早上的9:00的飞机，帮我安排一下</textarea>
+        </div>
+
+        <div class="rule-card">
+          <b>我会先做执行前判断</b>
+          <p>如果任务存在冲突、信息不足或危险内容，我会先提醒你补充确认；危险任务不会生成执行计划。</p>
+        </div>
+
+        <div class="section-head">
+          <b>常用场景</b>
+          <span></span>
+        </div>
+        <div class="home-scene-grid">
+          <div class="home-scene-card">
+            <b>✈️ 赶飞机</b>
+            <small>提醒、路线、车机、离家模式</small>
+          </div>
+          <div class="home-scene-card">
+            <b>🏠 下班回家</b>
+            <small>空调、热水器、灯光、音乐</small>
+          </div>
+          <div class="home-scene-card">
+            <b>🌙 睡前准备</b>
+            <small>门锁、安防、闹钟、日程</small>
+          </div>
+          <div class="home-scene-card">
+            <b>🚗 日常通勤</b>
+            <small>路况、停车、日程、提醒</small>
+          </div>
+        </div>
+
+        <div class="button-area">
+          <button onclick="judgeTask()">开始判断并安排</button>
+        </div>
+      </section>
+
+      <section class="page" id="judge">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>可以继续安排</h2>
+        <p class="sub">我已完成执行前判断，未发现冲突或危险内容。</p>
+
+        <div class="judge-hero">
+          <div class="judge-hero-icon">✓</div>
+          <b>已通过安全判断</b>
+          <p>这是一个正常的出行安排请求。接下来我会生成计划，但不会直接控制设备。</p>
+        </div>
+
+        <div class="judge-status-grid">
+          <div class="judge-status">
+            <strong>目标清晰</strong>
+            <span>明天 9:00 的飞机，需要安排出行准备</span>
+          </div>
+          <div class="judge-status">
+            <strong>无危险动作</strong>
+            <span>未涉及违法、破坏或损害财产内容</span>
+          </div>
+          <div class="judge-status">
+            <strong>需要确认</strong>
+            <span>车机和米家动作不会自动执行</span>
+          </div>
+          <div class="judge-status">
+            <strong>可随时修改</strong>
+            <span>时间、提醒和设备动作均可调整</span>
+          </div>
+        </div>
+
+        <div class="judge-bottom-note">下一步会解释我理解到的信息，并说明计划依据。</div>
+
+        <div class="button-area">
+          <button onclick="goTo('input')">继续理解信息</button>
+        </div>
+      </section>
+
+      <section class="page" id="input">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>我理解的是这些信息</h2>
+        <p class="sub">确认无误后，我会继续整理出明天的准备清单。</p>
+
+        <div class="goal-card">
+          <div class="label">你刚刚说</div>
+          <div class="goal-text">我明天早上的9:00的飞机，帮我安排一下。</div>
+
+          <div class="detected">
+            <div class="detected-item"><small>航班时间</small><b>明天 9:00</b></div>
+            <div class="detected-item"><small>场景</small><b>赶飞机</b></div>
+            <div class="detected-item"><small>出发地</small><b>常用家庭地址</b></div>
+            <div class="detected-item"><small>涉及设备</small><b>手机 / 车 / 家</b></div>
+          </div>
+        </div>
+
+        <div class="soft-notice">我会默认按“提前 90 分钟到机场”整理计划。出发地、航站楼和提醒时间都可以在下一步修改。</div>
+
+        <div class="button-area">
+          <button onclick="goTo('plan')">生成准备计划</button>
+        </div>
+      </section>
+
+      <section class="page" id="plan">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>已为你整理好准备清单</h2>
+        <p class="sub">按 9:00 航班倒推生成，所有时间和设备动作都可修改。</p>
+
+        <div class="plan-explain-compact">
+          建议 7:30 前到机场，预留路况、停车、值机和安检时间，因此建议 6:30 出发。
+        </div>
+
+        <div class="timeline-list" id="planList">
+          <div class="timeline-item">
+            <div class="timeline-time">5:50</div>
+            <div>
+              <b>起床与航班提醒</b>
+              <small>提醒天气、航班状态和出门准备。</small>
+            </div>
+            <div class="edit-tag" onclick="toast('可修改起床时间')">修改</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-time">6:15</div>
+            <div>
+              <b>出门前检查</b>
+              <small>身份证、充电器、行李和随身物品。</small>
+            </div>
+            <div class="edit-tag" onclick="toast('可修改检查清单')">修改</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-time">6:30</div>
+            <div>
+              <b>路线与车机导航</b>
+              <small>规划机场路线，上车后可直接导航。</small>
+            </div>
+            <div class="edit-tag" onclick="toast('可修改出发时间')">修改</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-time">离家前</div>
+            <div>
+              <b>设备检查与小爱提醒</b>
+              <small>关闭家中设备，播报天气、路况和航班时间。</small>
+            </div>
+            <div class="edit-tag" onclick="toast('可取消设备动作')">修改</div>
+          </div>
+        </div>
+
+        <div class="custom-add-card compact-add" onclick="openSheet()">
+          ＋ 添加自己的事项
+          <span>比如护照、药品、关窗</span>
+        </div>
+
+        <div class="compact-permission-line">
+          <span>日历权限</span>
+          <span>地图权限</span>
+          <span>米家授权</span>
+          <span>车机同步</span>
+          <span>执行前确认</span>
+        </div>
+
+        <div class="button-area">
+          <button onclick="goTo('confirm')">查看并确认</button>
+        </div>
+      </section>
+
+      <section class="page" id="confirm">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>执行前请确认</h2>
+        <p class="sub">你可以修改或取消任意一项。未确认前，我不会控制设备或同步到车机。</p>
+
+        <div class="soft-notice">为避免误操作，涉及物理设备和车机同步的动作必须经过你确认；后续执行前也会保留撤销入口。</div>
+
+        <div class="confirm-list">
+          <div class="confirm-row">
+            <div class="tick">✓</div>
+            <div>
+              <b>设置 5:50 起床提醒</b>
+              <small>提醒天气、航班状态和出门准备。</small>
+            </div>
+            <div class="tag">提醒</div>
+          </div>
+
+          <div class="confirm-row">
+            <div class="tick">✓</div>
+            <div>
+              <b>同步机场路线到小米汽车</b>
+              <small>上车后可直接开启导航。</small>
+            </div>
+            <div class="tag">需授权</div>
+          </div>
+
+          <div class="confirm-row">
+            <div class="tick">✓</div>
+            <div>
+              <b>出门前物品检查</b>
+              <small>提醒身份证、充电器、行李和随身物品。</small>
+            </div>
+            <div class="tag">可修改</div>
+          </div>
+
+          <div class="confirm-row">
+            <div class="tick">✓</div>
+            <div>
+              <b>离家模式待执行</b>
+              <small>关闭客厅灯、电视和空调，执行前可撤销。</small>
+            </div>
+            <div class="tag">设备</div>
+          </div>
+
+          <div class="confirm-row">
+            <div class="tick">✓</div>
+            <div>
+              <b>小爱语音提醒</b>
+              <small>播报天气、路况和航班时间。</small>
+            </div>
+            <div class="tag">提醒</div>
+          </div>
+        </div>
+
+        <div class="button-area">
+          <div class="ghost-row">
+            <button class="ghost" onclick="goTo('plan')">修改计划</button>
+            <button class="ghost" onclick="toast('已取消本次安排')">取消任务</button>
+          </div>
+          <button onclick="goTo('done')">确认安排</button>
+        </div>
+      </section>
+
+      <section class="page" id="done">
+        <div class="task-top-row">
+          <button class="back-btn" onclick="goBack()">‹ 返回</button>
+          <button class="task-menu-button" onclick="toggleTaskDirectory()">任务目录</button>
+        </div>
+
+        <div class="task-directory" id="taskDirectory">
+          <div class="task-directory-title">
+            当前任务
+            <span>4 项</span>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>起床与天气提醒</b>
+              <span>100%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 100%;"></div></div>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>路线与车机准备</b>
+              <span>80%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 80%;"></div></div>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>离家模式待执行</b>
+              <span>60%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 60%;"></div></div>
+          </div>
+
+          <div class="task-progress-item">
+            <div class="task-progress-top">
+              <b>小爱语音提醒</b>
+              <span>70%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: 70%;"></div></div>
+          </div>
+        </div>
+
+        <h2>已安排好</h2>
+        <p class="sub">你可以随时回来修改，涉及设备控制的动作会在执行前保留确认。</p>
+
+        <div class="final-hero">
+          <div class="final-check">✓</div>
+          <b>明日出行准备已创建</b>
+          <p>从 5:50 起，我会按时间顺序提醒你，并在需要时联动车机和家中设备。</p>
+        </div>
+
+        <div class="next-card">
+          <div class="next-title">
+            明早时间线
+            <span>可修改</span>
+          </div>
+
+          <div class="next-row">
+            <div class="next-time">5:50</div>
+            <div>
+              <b>起床与天气提醒</b>
+              <small>提醒天气、航班状态和出门准备。</small>
+            </div>
+          </div>
+
+          <div class="next-row">
+            <div class="next-time">6:30</div>
+            <div>
+              <b>路线与车机准备</b>
+              <small>机场路线准备同步到小米汽车，上车后可直接导航。</small>
+            </div>
+          </div>
+
+          <div class="next-row">
+            <div class="next-time">离家前</div>
+            <div>
+              <b>离家模式待执行</b>
+              <small>关闭客厅灯、电视和空调，执行前可撤销。</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="manage-row">
+          <div class="manage-card" onclick="toast('任务已暂停，可稍后继续')">暂停任务</div>
+          <div class="manage-card" onclick="goTo('home')">新建任务</div>
+        </div>
+
+        <div class="button-area">
+          <button onclick="toast('设置完成，任务已退出')">设置完成并退出</button>
+        </div>
+      </section>
+
+      <div class="overlay" id="overlay" onclick="closeSheet()"></div>
+      <div class="sheet" id="sheet">
+        <h3>添加自己的事项</h3>
+        <p>补充你担心遗漏的事情，我会把它加入准备清单。</p>
+        <textarea class="sheet-input" id="customInput" placeholder="例如：提醒我带护照、常用药，出门前检查窗户"></textarea>
+        <div class="sheet-actions">
+          <button class="ghost" onclick="closeSheet()">暂不添加</button>
+          <button onclick="addCustomItem()">加入清单</button>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+      <div class="home-indicator"></div>
+    </div>
+  </main>
+
+  <script>
+    function judgeTask() {
+      const text = document.getElementById("userTaskInput").value.trim();
+
+      if (!text) {
+        toast("请先输入你想安排的任务");
+        return;
+      }
+
+      const dangerWords = ["炸", "爆炸", "毁", "破坏", "烧", "点火", "伤害", "砸", "撞"];
+      const hasDanger = dangerWords.some(word => text.includes(word));
+
+      if (hasDanger) {
+        toast("识别到危险请求，不能生成执行计划");
+        return;
+      }
+
+      const conflict = (text.includes("起床") || text.includes("叫醒") || text.includes("叫我")) &&
+        (text.includes("别定闹钟") || text.includes("不要闹钟") || text.includes("不定闹钟"));
+
+      if (conflict) {
+        toast("任务存在冲突，需要先补充提醒方式");
+        return;
+      }
+
+      goTo("judge");
+    }
+
+    const pageHistory = ["home"];
+
+    function currentPageId() {
+      const active = document.querySelector(".page.active");
+      return active ? active.id : "home";
+    }
+
+    function goTo(id, record = true) {
+      const current = currentPageId();
+      document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+
+      if (record && current !== id) {
+        pageHistory.push(id);
+      }
+    }
+
+    function goBack() {
+      if (pageHistory.length > 1) {
+        pageHistory.pop();
+        const previous = pageHistory[pageHistory.length - 1];
+        goTo(previous, false);
+      } else {
+        goTo("home", false);
+      }
+    }
+
+    function openSheet() {
+      document.getElementById("overlay").classList.add("show");
+      document.getElementById("sheet").classList.add("show");
+      setTimeout(() => document.getElementById("customInput").focus(), 220);
+    }
+
+    function closeSheet() {
+      document.getElementById("overlay").classList.remove("show");
+      document.getElementById("sheet").classList.remove("show");
+    }
+
+    function addCustomItem() {
+      const input = document.getElementById("customInput");
+      const text = input.value.trim() || "提醒我带护照、常用药，出门前检查窗户";
+
+      const card = document.createElement("div");
+      card.className = "timeline-item";
+      card.innerHTML = `
+        <div class="timeline-time">新增</div>
+        <div>
+          <b>你添加的事项</b>
+          <small>${escapeHTML(text)}</small>
+        </div>
+        <div class="edit-tag" onclick="toast('可修改你添加的事项')">修改</div>
+      `;
+
+      document.getElementById("planList").appendChild(card);
+      input.value = "";
+      closeSheet();
+      toast("已加入准备清单");
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, function(match) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        }[match];
+      });
+    }
+
+    function toggleTaskDirectory() {
+      const panel = document.getElementById("taskDirectory");
+      if (panel) {
+        panel.classList.toggle("show");
+      }
+    }
+
+    function toggleHomeTaskDirectory() {
+      const panel = document.getElementById("homeTaskDirectory");
+      if (panel) {
+        panel.classList.toggle("show");
+      }
+    }
+
+    let timer;
+    function toast(text) {
+      const el = document.getElementById("toast");
+      el.textContent = text;
+      el.classList.add("show");
+      clearTimeout(timer);
+      timer = setTimeout(() => el.classList.remove("show"), 1700);
+    }
+  </script>
+</body>
+</html>

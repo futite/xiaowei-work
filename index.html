@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小薇 AI 助手 Demo</title>
+  <style>
+    :root {
+      --orange: #ff6900;
+      --purple: #7c5cff;
+      --bg: #f7f8fa;
+      --text: #171717;
+      --sub: #767676;
+      --card: #ffffff;
+      --shadow: 0 12px 40px rgba(20, 20, 20, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,105,0,.12), transparent 35%),
+        radial-gradient(circle at 80% 85%, rgba(124,92,255,.10), transparent 35%),
+        linear-gradient(135deg, #eef1f5 0%, #ffffff 46%, #f7efe8 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC",
+        "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 720px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--orange), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: var(--sub);
+      margin-bottom: 44px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 560px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 36px 28px 28px;
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      color: var(--text);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: block;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(20, 20, 20, 0.14);
+    }
+    .card-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.5;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+    .tag-life { background: #fff3e8; color: #ff6900; }
+    .tag-job { background: #f3eeff; color: #7c5cff; }
+    .footer {
+      margin-top: 48px;
+      font-size: 13px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>小薇 AI 助手</h1>
+    <p class="subtitle">两个 AI 助手 Demo，点击即可体验</p>
+    <div class="cards">
+      <a class="card" href="xiaowei-life-assistant/">
+        <div class="card-icon">🛫</div>
+        <h2>小薇生活助手</h2>
+        <p>航班查询 AI 助手 —— 自然语言对话式交互，帮你快速查询航班信息</p>
+        <span class="tag tag-life">Flight Agent Demo</span>
+      </a>
+      <a class="card" href="xiaowei-job-agent/">
+        <div class="card-icon">💼</div>
+        <h2>小薇找工作</h2>
+        <p>AI 求职助手 —— 模拟求职对话场景，智能匹配岗位机会</p>
+        <span class="tag tag-job">Job Agent Demo</span>
+      </a>
+    </div>
+    <p class="footer">纯前端 Demo · 无后端依赖 · 手机模拟器展示</p>
+  </div>
+</body>
+</html>

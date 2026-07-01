@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小薇找工作｜AI 求职 Agent Demo</title>
+  <style>
+    :root {
+      --purple: #ec4899;
+      --purple-deep: #db2777;
+      --purple-soft: #fff0f7;
+      --blue: #f472b6;
+      --blue-soft: #fff5fb;
+      --green: #f97316;
+      --green-soft: #fff3e8;
+      --orange: #fb7185;
+      --orange-soft: #fff1f2;
+      --red: #ef4444;
+      --red-soft: #fff1f2;
+      --bg: #fff8fc;
+      --card: #ffffff;
+      --text: #171717;
+      --sub: #737373;
+      --line: #eeeeee;
+      --shadow: 0 14px 34px rgba(20, 20, 20, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 14% 8%, rgba(124,92,255,.16), transparent 32%),
+        radial-gradient(circle at 86% 90%, rgba(255,138,61,.12), transparent 34%),
+        linear-gradient(135deg, #fff7fb 0%, #fffdfd 42%, #fff0f7 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC",
+        "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      padding: 28px 12px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      border: 8px solid #111;
+      border-radius: 42px;
+      overflow: hidden;
+      background: var(--bg);
+      box-shadow: 0 30px 90px rgba(0,0,0,.26);
+      position: relative;
+    }
+
+    .status {
+      height: 44px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(18px);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .icons { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+
+    .battery {
+      width: 28px;
+      height: 13px;
+      border: 2px solid #111;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      right: -5px;
+      top: 3px;
+      width: 3px;
+      height: 5px;
+      background: #111;
+      border-radius: 2px;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 18px;
+      height: 5px;
+      background: #111;
+      border-radius: 2px;
+    }
+
+    .screen {
+      height: calc(100% - 44px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page {
+      height: 100%;
+      padding: 22px 20px 26px;
+      display: none;
+      flex-direction: column;
+      animation: show .2s ease;
+      overflow: hidden;
+    }
+
+    .page.active { display: flex; }
+
+    @keyframes show {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f472b6, #fb7185);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 900;
+      font-family: "STKaiti", "KaiTi", "Songti SC", serif;
+      box-shadow: 0 10px 20px rgba(124,92,255,.22);
+    }
+
+    .brand-text { line-height: 1.2; }
+    .brand-text b { display: block; font-size: 16px; }
+    .brand-text span { color: var(--sub); font-size: 12px; }
+
+    h1, h2 { margin: 0; color: var(--text); letter-spacing: -0.4px; }
+    h1 { font-size: 29px; line-height: 1.15; }
+    h2 { font-size: 25px; line-height: 1.2; }
+
+    .sub {
+      margin: 9px 0 0;
+      color: var(--sub);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    button {
+      width: 100%;
+      height: 52px;
+      border-radius: 26px;
+      border: none;
+      background: var(--purple);
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 14px 24px rgba(124,92,255,.24);
+      transition: .12s ease;
+    }
+
+    button:hover { background: var(--purple-deep); }
+    button:active { transform: scale(.98); }
+
+    .button-area {
+      margin-top: auto;
+      padding-bottom: 8px;
+    }
+
+    .back-row { margin-bottom: 12px; }
+
+    .back-btn, .chip-btn {
+      width: auto;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--purple);
+      border: 1px solid rgba(124,92,255,.25);
+      box-shadow: none;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .back-btn {
+      color: #555;
+      border-color: #eee;
+    }
+
+    .ghost-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .ghost {
+      background: #fff;
+      color: #444;
+      border: 1px solid var(--line);
+      box-shadow: none;
+      font-weight: 800;
+    }
+
+    .card {
+      background: #fffdfd;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,.04);
+    }
+
+    .hero-card {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #f9a8d4, #fda4af);
+      color: #fff;
+      box-shadow: 0 18px 38px rgba(244,114,182,.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      right: -55px;
+      top: -60px;
+      width: 150px;
+      height: 150px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+    }
+
+    .hero-card small {
+      display: block;
+      opacity: .85;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card b {
+      display: block;
+      font-size: 20px;
+      line-height: 1.35;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sync-card {
+      margin-top: 13px;
+      padding: 13px;
+      border-radius: 18px;
+      background: #fffafc;
+      border: 1px solid #f8dce8;
+      box-shadow: 0 8px 18px rgba(0,0,0,.04);
+    }
+
+    .sync-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .sync-title span {
+      color: var(--green);
+      background: var(--green-soft);
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    .sync-sources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .source-chip {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #f7f8fa;
+      color: #666;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #eee;
+    }
+
+    .stats {
+      margin-top: 13px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .stat-card {
+      padding: 12px 7px;
+      border-radius: 17px;
+      background: #fffafc;
+      border: 1px solid #f8dce8;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(0,0,0,.04);
+    }
+
+    .stat-card b {
+      display: block;
+      color: var(--purple);
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .stat-card span {
+      color: #777;
+      font-size: 11px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin: 15px 0 9px;
+    }
+
+    .section-head b { font-size: 14px; }
+    .section-head span { color: #999; font-size: 11px; }
+
+    .job-mini {
+      padding: 11px 12px;
+      border-radius: 18px;
+      background: #fffafc;
+      border: 1px solid #f8dce8;
+      box-shadow: 0 8px 18px rgba(0,0,0,.04);
+      margin-bottom: 8px;
+    }
+
+    .job-mini b {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 5px;
+    }
+
+    .job-mini small {
+      color: #777;
+      font-size: 11.5px;
+    }
+
+    .profile-hero {
+      margin-top: 8px;
+      padding: 14px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #fbcfe8, #f9a8d4);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(183,148,244,.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero::after {
+      content: "";
+      position: absolute;
+      right: -52px;
+      top: -62px;
+      width: 150px;
+      height: 150px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+    }
+
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.24);
+      display: grid;
+      place-items: center;
+      font-size: 25px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-hero b {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-hero p {
+      margin: 0;
+      color: rgba(255,255,255,.92);
+      font-size: 11.8px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tag-grid {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .profile-tag {
+      background: #fff;
+      color: var(--purple);
+      border: 1px solid rgba(124,92,255,.18);
+      padding: 7px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 900;
+      box-shadow: 0 6px 15px rgba(0,0,0,.035);
+    }
+
+    .asset-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .asset-card {
+      min-height: 86px;
+      padding: 13px;
+      border-radius: 20px;
+      background: #fffafc;
+      border: 1px solid #f8dce8;
+      box-shadow: 0 8px 18px rgba(0,0,0,.04);
+    }
+
+    .asset-card b {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 5px;
+    }
+
+    .asset-card small {
+      display: block;
+      color: #777;
+      font-size: 11.5px;
+      line-height: 1.35;
+    }
+
+    .recommend-list {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .recommend-card {
+      padding: 14px;
+      border-radius: 22px;
+      background: #fffdfd;
+      border: 1px solid #eee;
+      box-shadow: 0 8px 18px rgba(0,0,0,.045);
+      cursor: pointer;
+    }
+
+    .recommend-card.selected {
+      border-color: rgba(124,92,255,.45);
+      background: var(--purple-soft);
+    }
+
+    .recommend-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .recommend-top b {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .match-pill {
+      flex: 0 0 auto;
+      background: var(--green-soft);
+      color: var(--green);
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .recommend-card small {
+      display: block;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .reason {
+      margin-top: 8px;
+      color: var(--purple);
+      font-size: 11.5px;
+      font-weight: 900;
+    }
+
+    .flow-card {
+      margin-top: 16px;
+      padding: 15px;
+      border-radius: 22px;
+      background: #fffdfd;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,.04);
+    }
+
+    .flow-title {
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f2f2f2;
+      font-size: 12.5px;
+      color: #444;
+      line-height: 1.35;
+    }
+
+    .flow-row:last-child { border-bottom: none; }
+    .flow-row span:first-child { color: var(--purple); font-weight: 900; }
+
+    .match-summary {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 22px;
+      background: #fffafc;
+      border: 1px solid rgba(236,72,153,.08);
+      box-shadow: var(--shadow);
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .score-circle {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: conic-gradient(var(--purple) 0 86%, #eee 86% 100%);
+      font-weight: 900;
+      font-size: 19px;
+      flex: 0 0 auto;
+    }
+
+    .match-summary b {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .match-summary small {
+      color: #777;
+      line-height: 1.4;
+      font-size: 12px;
+    }
+
+    .material-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .material-card {
+      padding: 12px;
+      border-radius: 18px;
+      background: #fffafc;
+      border: 1px solid #f8dce8;
+      box-shadow: 0 8px 18px rgba(0,0,0,.04);
+    }
+
+    .material-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .material-top b {
+      font-size: 13.5px;
+      line-height: 1.3;
+    }
+
+    .material-top span {
+      background: var(--green-soft);
+      color: var(--green);
+      padding: 4px 7px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .material-card small {
+      display: block;
+      color: #777;
+      font-size: 11.8px;
+      line-height: 1.45;
+    }
+
+    .resume-card {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 22px;
+      background: #fffafc;
+      border: 1px solid rgba(236,72,153,.08);
+      box-shadow: var(--shadow);
+    }
+
+    .resume-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .resume-title span {
+      color: var(--green);
+      background: var(--green-soft);
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    .resume-block {
+      padding: 12px;
+      border-radius: 16px;
+      background: #f7f8fa;
+      border: 1px solid #eeeeee;
+      margin-bottom: 9px;
+    }
+
+    .resume-block.highlight {
+      background: var(--purple-soft);
+      border-color: rgba(124,92,255,.22);
+    }
+
+    .resume-block b {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #555;
+    }
+
+    .resume-block p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #444;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .small-btn {
+      height: 42px;
+      font-size: 13px;
+      border-radius: 21px;
+    }
+
+    .save-hero {
+      margin-top: 20px;
+      padding: 22px 18px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, rgba(124,92,255,.96), rgba(255,138,61,.88));
+      color: #fff;
+      box-shadow: 0 18px 38px rgba(124,92,255,.22);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .save-hero::after {
+      content: "";
+      position: absolute;
+      right: -52px;
+      top: -62px;
+      width: 150px;
+      height: 150px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+    }
+
+    .save-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.22);
+      display: grid;
+      place-items: center;
+      font-size: 36px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .save-hero b {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 7px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .save-hero p {
+      margin: 0;
+      color: rgba(255,255,255,.9);
+      font-size: 13px;
+      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+    }
+
+    .task-card {
+      margin-top: 14px;
+      padding: 15px;
+      border-radius: 22px;
+      background: #fffdfd;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,.04);
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .task-row {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: 7px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f2f2f2;
+      font-size: 12.6px;
+      color: #444;
+    }
+
+    .task-row:last-child { border-bottom: none; }
+    .task-row span:first-child { color: var(--green); font-weight: 900; }
+
+
+    .add-experience-btn {
+      width: 82px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--purple);
+      border: 1px solid rgba(139,92,246,.25);
+      box-shadow: none;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .profile-bubble-wrap {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .profile-bubble {
+      border: none;
+      width: auto;
+      height: auto;
+      min-height: 38px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: #fffdfd;
+      color: #4b3b63;
+      border: 1px solid rgba(139,92,246,.13);
+      box-shadow: 0 7px 16px rgba(139,92,246,.07);
+      font-size: 12.2px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: .15s ease;
+    }
+
+    .profile-bubble:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .profile-bubble.feature {
+      color: #4b3b63;
+      border: 1px solid rgba(139,92,246,.13);
+    }
+
+    .profile-bubble:nth-child(6n+1) { background: #f5f0ff; }
+    .profile-bubble:nth-child(6n+2) { background: #fff1e8; }
+    .profile-bubble:nth-child(6n+3) { background: #eefdf5; }
+    .profile-bubble:nth-child(6n+4) { background: #eef6ff; }
+    .profile-bubble:nth-child(6n+5) { background: #fff0f7; }
+    .profile-bubble:nth-child(6n) { background: #fffbe8; }
+
+
+    .profile-detail-card {
+      margin-top: 12px;
+      padding: 15px;
+      border-radius: 22px;
+      background: #fffafc;
+      border: 1px solid rgba(236,72,153,.08);
+      box-shadow: var(--shadow);
+    }
+
+    .profile-detail-card .detail-label {
+      display: inline-flex;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--purple-soft);
+      color: var(--purple);
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .profile-detail-card b {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .profile-detail-card p {
+      margin: 0;
+      color: #666;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .recommend-scroll {
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 3px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .recommend-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .recommend-scroll::-webkit-scrollbar-thumb {
+      background: rgba(124,92,255,.35);
+      border-radius: 999px;
+    }
+
+    .scroll-hint {
+      margin-top: 8px;
+      text-align: center;
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+
+    .bubble-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s;
+      z-index: 30;
+    }
+
+    .bubble-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bubble-sheet {
+      position: absolute;
+      left: 26px;
+      right: 26px;
+      top: 50%;
+      padding: 18px;
+      border-radius: 26px;
+      background: #fffdfd;
+      box-shadow: 0 22px 55px rgba(0,0,0,.22);
+      transform: translateY(-50%) scale(.92);
+      opacity: 0;
+      pointer-events: none;
+      transition: .22s ease;
+      z-index: 31;
+    }
+
+    .bubble-sheet.show {
+      transform: translateY(-50%) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bubble-sheet h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .bubble-sheet p {
+      margin: 0 0 12px;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .bubble-input {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #eeeeee;
+      border-radius: 16px;
+      background: #f7f8fa;
+      padding: 0 13px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+
+    .bubble-textarea {
+      width: 100%;
+      min-height: 86px;
+      resize: none;
+      border: 1px solid #eeeeee;
+      border-radius: 18px;
+      background: #f7f8fa;
+      padding: 13px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      line-height: 1.45;
+    }
+
+    .bubble-input:focus,
+    .bubble-textarea:focus {
+      border-color: rgba(124,92,255,.55);
+      background: #fffdfd;
+    }
+
+    .bubble-sheet-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .bubble-sheet-actions button {
+      height: 46px;
+      font-size: 14px;
+    }
+
+
+    .cute-decor {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .decor-card {
+      min-height: 86px;
+      padding: 12px 14px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #fff1f7, #fff7fb);
+      border: 1px solid rgba(236,72,153,.12);
+      box-shadow: 0 8px 18px rgba(236,72,153,.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .decor-card b {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #7a355b;
+    }
+
+    .decor-card small {
+      display: block;
+      color: #8b6b7d;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .decor-card::after {
+      content: "";
+      position: absolute;
+      right: -20px;
+      bottom: -20px;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: rgba(244,114,182,.08);
+    }
+
+    .sticker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .sticker {
+      border-radius: 20px;
+      background: linear-gradient(135deg, #fff3f8, #ffffff);
+      border: 1px solid rgba(251,113,133,.12);
+      box-shadow: 0 8px 18px rgba(251,113,133,.06);
+      display: grid;
+      place-items: center;
+      min-height: 86px;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .sticker .emoji {
+      font-size: 22px;
+      margin-bottom: 5px;
+      line-height: 1;
+    }
+
+    .sticker span {
+      color: #8b6b7d;
+      font-size: 10.5px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 98px;
+      transform: translateX(-50%) translateY(18px);
+      background: rgba(0,0,0,.78);
+      color: #fff;
+      padding: 10px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      opacity: 0;
+      transition: .2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 40;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .home-indicator {
+      width: 130px;
+      height: 5px;
+      border-radius: 999px;
+      background: #111;
+      position: absolute;
+      left: 50%;
+      bottom: 9px;
+      transform: translateX(-50%);
+      opacity: .95;
+    }
+
+    @media (max-width: 430px) {
+      body { padding: 0; background: #111; }
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="phone">
+    <div class="status">
+      <span>13:45</span>
+      <div class="icons">
+        <span>5G</span>
+        <span>▮▮▮</span>
+        <span class="battery"></span>
+      </div>
+    </div>
+
+    <div class="screen">
+      <!-- Page 1 Dashboard -->
+      <section class="page active" id="home">
+        <div class="nav">
+          <div class="brand">
+            <div class="logo">薇</div>
+            <div class="brand-text">
+              <b>小薇找工作</b>
+              <span>AI 求职 Agent</span>
+            </div>
+          </div>
+          <button class="chip-btn" onclick="goTo('profile')">个人空间</button>
+        </div>
+
+        <h1>今天也要<br />认真找工作呀</h1>
+        <p class="sub">小薇会帮你同步投递进度、整理个人素材、推荐适合岗位，并生成更贴合岗位的简历版本。</p>
+
+        <div class="sync-card">
+          <div class="sync-title">投递进度已同步 <span>今日更新</span></div>
+          <div class="sync-sources">
+            <div class="source-chip">招聘 App</div>
+            <div class="source-chip">邮箱</div>
+            <div class="source-chip">官网投递</div>
+            <div class="source-chip">表格导入</div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card"><b>18</b><span>已投递</span></div>
+          <div class="stat-card"><b>5</b><span>面试中</span></div>
+          <div class="stat-card"><b>2</b><span>Offer</span></div>
+          <div class="stat-card"><b>4</b><span>待优化</span></div>
+        </div>
+
+        <div class="section-head">
+          <b>小薇推荐</b>
+          <span>按经历匹配</span>
+        </div>
+        <div class="job-mini">
+          <b>AI 产品实习生｜智能硬件方向</b>
+          <small>匹配小薇生活助手 Demo、大模型评测、产品复盘能力</small>
+        </div>
+        <div class="job-mini">
+          <b>大模型评测实习生｜数据质量方向</b>
+          <small>匹配 BabyLM 实验、模型效果分析、数据处理经历</small>
+        </div>
+
+        <div class="cute-decor">
+          <div class="decor-card">
+            <b>今日求职小提示</b>
+            <small>先看投递进度，再挑最适合的岗位版本，小薇会帮你把经历整理得更清楚一点。</small>
+          </div>
+          <div class="sticker-grid">
+            <div class="sticker">
+              <div class="emoji">💗</div>
+              <span>继续冲呀</span>
+            </div>
+            <div class="sticker">
+              <div class="emoji">✨</div>
+              <span>简历加油</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-area">
+          <button onclick="goTo('recommend')">查看推荐岗位</button>
+        </div>
+      </section>
+
+      <!-- Page 2 Profile Space -->
+      <section class="page" id="profile">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+
+        <div class="nav">
+          <div>
+            <h2>个人空间</h2>
+            <p class="sub">我的经历、项目、奖项和证书，都会成为生成岗位简历的素材。</p>
+          </div>
+          <button class="add-experience-btn" onclick="openBubbleSheet()">添加气泡</button>
+        </div>
+
+        <div class="profile-hero">
+          <div class="avatar">薇</div>
+          <b>杨于薇｜AI 产品 / 大模型方向</b>
+          <p>这里不是普通资料页，而是我的求职素材库。生成简历时，系统只调用这里已有的真实经历。</p>
+        </div>
+
+        <div class="profile-bubble-wrap">
+          <button class="profile-bubble feature" onclick="showProfileDetail('清华大学访学', '2025.06—2025.09，参与基于大语言模型的受限文本生成与推理干预、AIGC 自动化数据合成与 Prompt 工程，涉及 Constrained Decoding、Prompt Engineering、Synthetic Data 等能力。')">清华访学</button>
+
+          <button class="profile-bubble feature" onclick="showProfileDetail('启元国家实验室实习', '2025.09—2025.12，参与基于 SFT 与 RFT 的古汉语多音字消歧，使用 Verl 框架、Qwen-8B、BERT、Reward Function 与 Masked Loss 等技术。')">启元实习</button>
+
+          <button class="profile-bubble feature" onclick="showProfileDetail('国家奖学金X2', '获得 2022-2023 年本科生国家奖学金、2023-2024 年研究生国家奖学金，可体现持续学习能力和学业表现。')">国家奖学金X2</button>
+
+          <button class="profile-bubble feature" onclick="showProfileDetail('ACL 论文', '论文 From Scaffolding to Assimilation: Progressive Structural Internalization for Format-Constrained Creative Text Generation，2026 ACL，二作。')">ACL 论文</button>
+
+          <button class="profile-bubble" onclick="showProfileDetail('Chinese BabyLM', '围绕中文 BabyLM 进行小数据条件下语言模型高效预训练研究，完成模型训练、评测分析、实验复盘和论文写作，并取得 Chinese BabyLM 第三名。')">Chinese BabyLM</button>
+
+          <button class="profile-bubble" onclick="showProfileDetail('小薇生活助手', '独立设计并实现生活场景 AI Agent Demo，覆盖安全判断、计划解释、用户确认、多任务管理和可交互前端 Demo。')">小薇生活助手</button>
+
+          <button class="profile-bubble" onclick="showProfileDetail('SFT', '熟悉监督微调流程，能结合任务目标构造训练数据、设计训练方案，并理解模型在垂直任务中的效果优化路径。')">SFT</button>
+
+          <button class="profile-bubble" onclick="showProfileDetail('RFT', '在启元国家实验室实习中接触 RFT 训练，基于 Verl 框架和 Reward Function 设计进行古汉语多音字消歧任务探索。')">RFT</button>
+
+          <button class="profile-bubble" onclick="showProfileDetail('诗词模型', '围绕诗词生成、格式约束创意文本生成和押韵机制分析，探索大模型在文学生成场景中的可控生成能力。')">诗词模型</button>
+
+
+          <button class="profile-bubble" onclick="showProfileDetail('大模型评测', '具备模型效果分析、指标解读、数据质量判断和实验对比能力，可适配 AI 数据、评测、Prompt 相关岗位。')">大模型评测</button>
+
+          <button class="profile-bubble" onclick="showProfileDetail('江苏省优秀本科毕业论文', '基于语言损伤的汉语认知障碍早期智能测评，使用 NLP 与深度学习分析语音转录文本。')">优秀毕业论文</button>
+        </div>
+
+        <div class="profile-detail-card" id="profileDetail">
+          <div class="detail-label">点击气泡查看详情</div>
+          <b>我的特色经历会在这里展开</b>
+          <p>选择上方任意气泡，系统会展示这段经历的内容，并在推荐岗位和生成简历时调用对应素材。</p>
+        </div>
+
+        <div class="button-area">
+          <button onclick="goTo('recommend')">根据个人空间推荐岗位</button>
+        </div>
+      </section>
+
+      <!-- Page 3 Job Recommendation -->
+      <section class="page" id="recommend">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>适配岗位推荐</h2>
+        <p class="sub">根据个人空间中的项目、奖项、技能和求职方向，推荐更适合投递的岗位。</p>
+
+        <div class="recommend-scroll">
+          <div class="recommend-list">
+            <div class="recommend-card selected" onclick="selectJob(this, 'AI 产品实习生')">
+              <div class="recommend-top">
+                <b>AI 产品实习生｜智能硬件方向</b>
+                <div class="match-pill">86%</div>
+              </div>
+              <small>适合突出 AI Agent 产品案例、PRD、Demo 落地和安全可控执行设计。</small>
+              <div class="reason">推荐原因：小薇生活助手、清华访学、产品复盘能力匹配</div>
+            </div>
+
+            <div class="recommend-card" onclick="selectJob(this, '大模型评测实习生')">
+              <div class="recommend-top">
+                <b>大模型评测实习生｜数据质量方向</b>
+                <div class="match-pill">84%</div>
+              </div>
+              <small>适合突出 BabyLM、模型效果分析、数据集处理和实验复盘。</small>
+              <div class="reason">推荐原因：Chinese BabyLM 与模型评测经历匹配</div>
+            </div>
+
+            <div class="recommend-card" onclick="selectJob(this, 'AIGC 数据产品实习生')">
+              <div class="recommend-top">
+                <b>AIGC 数据产品实习生</b>
+                <div class="match-pill">81%</div>
+              </div>
+              <small>适合突出数据合成、Prompt 工程、质量检查和需求拆解。</small>
+              <div class="reason">推荐原因：清华访学中的 AIGC 数据合成经历匹配</div>
+            </div>
+
+            <div class="recommend-card" onclick="selectJob(this, 'Prompt 工程实习生')">
+              <div class="recommend-top">
+                <b>Prompt 工程实习生</b>
+                <div class="match-pill">79%</div>
+              </div>
+              <small>适合突出 Few-shot、In-context Learning、SFT 数据构造和提示词调优。</small>
+              <div class="reason">推荐原因：Prompt Engineering 与 Synthetic Data 经历匹配</div>
+            </div>
+
+            <div class="recommend-card" onclick="selectJob(this, 'NLP 算法实习生')">
+              <div class="recommend-top">
+                <b>NLP 算法实习生｜文本生成方向</b>
+                <div class="match-pill">77%</div>
+              </div>
+              <small>适合突出受限文本生成、LogitProcessor、Constrained Decoding 和 ACL 论文。</small>
+              <div class="reason">推荐原因：清华访学与 ACL 论文经历匹配</div>
+            </div>
+
+            <div class="recommend-card" onclick="selectJob(this, 'AI 产品运营实习生')">
+              <div class="recommend-top">
+                <b>AI 产品运营实习生</b>
+                <div class="match-pill">72%</div>
+              </div>
+              <small>适合突出产品体验反馈、需求分析、用户场景拆解和内容表达能力。</small>
+              <div class="reason">推荐原因：求职助手体验反馈与产品复盘经历匹配</div>
+            </div>
+          </div>
+        </div>
+        <div class="scroll-hint">⌄ 向下滑动查看更多岗位</div>
+
+        <div class="flow-card">
+          <div class="flow-title">生成简历前会做什么？</div>
+          <div class="flow-row"><span>1</span><span>读取岗位 JD 和招聘要求</span></div>
+          <div class="flow-row"><span>2</span><span>从个人空间匹配经历、项目、奖项和技能</span></div>
+          <div class="flow-row"><span>3</span><span>生成一版岗位专属简历，不编造不存在的经历</span></div>
+        </div>
+
+        <div class="button-area">
+          <button onclick="goTo('match')">选择该岗位并分析</button>
+        </div>
+      </section>
+
+      <!-- Page 4 Matching -->
+      <section class="page" id="match">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>经历匹配分析</h2>
+        <p class="sub">系统只从个人空间已有素材中选择相关经历，不生成不存在的内容。</p>
+
+        <div class="match-summary">
+          <div class="score-row">
+            <div>
+              <b>AI 产品实习生匹配度较高</b>
+              <small>建议突出 AI Agent Demo、PRD、项目复盘和模型评测经历。</small>
+            </div>
+            <div class="score-circle">86%</div>
+          </div>
+        </div>
+
+        <div class="material-list">
+          <div class="material-card">
+            <div class="material-top">
+              <b>小薇生活助手 AI Agent Demo</b>
+              <span>强匹配</span>
+            </div>
+            <small>可证明 AI 产品思考、用户流程设计、安全判断、任务状态管理和可交互 Demo 落地能力。</small>
+          </div>
+
+          <div class="material-card">
+            <div class="material-top">
+              <b>Chinese BabyLM / 大模型评测</b>
+              <span>强匹配</span>
+            </div>
+            <small>Chinese BabyLM 第三名，可证明模型效果分析、实验对比、数据指标理解和技术沟通能力。</small>
+          </div>
+
+          <div class="material-card">
+            <div class="material-top">
+              <b>求职投递管理助手体验反馈</b>
+              <span>中匹配</span>
+            </div>
+            <small>可证明产品体验分析、需求复盘和 Agent 功能判断能力。</small>
+          </div>
+        </div>
+
+        <div class="button-area">
+          <button onclick="goTo('resume')">生成岗位专属简历</button>
+        </div>
+      </section>
+
+      <!-- Page 5 Resume Generation -->
+      <section class="page" id="resume">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>岗位专属简历</h2>
+        <p class="sub">AI 生成一版用于投递该岗位的简历内容，用户可以继续编辑。</p>
+
+        <div class="resume-card">
+          <div class="resume-title">
+            简历重点已调整
+            <span>可编辑</span>
+          </div>
+
+          <div class="resume-block">
+            <b>投递岗位</b>
+            <p>AI 产品实习生｜智能硬件 / Agent 产品方向</p>
+          </div>
+
+          <div class="resume-block highlight">
+            <b>推荐放在第一位的项目</b>
+            <p>独立设计并实现“小薇生活助手”AI Agent 产品原型，围绕 9:00 航班场景完成目标识别、安全判断、计划解释、用户确认、多任务状态管理和可交互前端 Demo。</p>
+          </div>
+
+          <div class="resume-block">
+            <b>建议补充表达</b>
+            <p>结合大模型评测与产品体验复盘经历，能够从用户场景、模型能力边界和执行安全机制三个角度分析 AI 产品。</p>
+          </div>
+
+          <div class="controls">
+            <button class="small-btn ghost" onclick="toast('已进入编辑模式')">手动编辑</button>
+            <button class="small-btn ghost" onclick="toast('已重新生成一版')">换个表达</button>
+          </div>
+        </div>
+
+        <div class="button-area">
+          <button onclick="goTo('save')">保存为该岗位版本</button>
+        </div>
+      </section>
+
+      <!-- Page 6 Save -->
+      <section class="page" id="save">
+        <div class="back-row"><button class="back-btn" onclick="goBack()">‹ 返回</button></div>
+        <h2>已保存</h2>
+        <p class="sub">该岗位已有专属简历，并自动加入投递管理。</p>
+
+        <div class="save-hero">
+          <div class="save-icon">✓</div>
+          <b>AI 产品实习生版本已创建</b>
+          <p>这版简历已绑定该岗位，可继续修改、导出或用于投递。</p>
+        </div>
+
+        <div class="task-card">
+          <div class="task-title">后续待办</div>
+          <div class="task-row"><span>✓</span><span>检查简历内容是否与真实经历一致</span></div>
+          <div class="task-row"><span>✓</span><span>补充 PRD / Demo / 项目复盘链接</span></div>
+          <div class="task-row"><span>✓</span><span>投递到目标岗位并记录状态</span></div>
+          <div class="task-row"><span>✓</span><span>3 天后跟进 HR 反馈</span></div>
+        </div>
+
+        <div class="ghost-row">
+          <button class="ghost" onclick="goTo('resume')">继续修改</button>
+          <button class="ghost" onclick="toast('已导出简历文档')">导出简历</button>
+        </div>
+
+        <div class="button-area">
+          <button onclick="goTo('home')">完成并返回首页</button>
+        </div>
+      </section>
+
+
+      <div class="bubble-overlay" id="bubbleOverlay" onclick="closeBubbleSheet()"></div>
+      <div class="bubble-sheet" id="bubbleSheet">
+        <h3>添加气泡</h3>
+        <p>录入新的经历、项目、奖项或证书，它会加入个人空间，并可用于后续岗位匹配。</p>
+        <input class="bubble-input" id="bubbleTitleInput" placeholder="气泡名称，例如：产品实习经历" />
+        <textarea class="bubble-textarea" id="bubbleDescInput" placeholder="补充说明，例如：负责需求分析、原型设计、数据看板或项目复盘"></textarea>
+        <div class="bubble-sheet-actions">
+          <button class="ghost" onclick="closeBubbleSheet()">暂不添加</button>
+          <button onclick="addNewBubble()">添加气泡</button>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+      <div class="home-indicator"></div>
+    </div>
+  </main>
+
+  <script>
+    const pageHistory = ["home"];
+    let selectedJob = "AI 产品实习生";
+
+    function currentPageId() {
+      const active = document.querySelector(".page.active");
+      return active ? active.id : "home";
+    }
+
+    function goTo(id, record = true) {
+      const current = currentPageId();
+      document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+
+      if (record && current !== id) {
+        pageHistory.push(id);
+      }
+    }
+
+    function goBack() {
+      if (pageHistory.length > 1) {
+        pageHistory.pop();
+        const previous = pageHistory[pageHistory.length - 1];
+        goTo(previous, false);
+      } else {
+        goTo("home", false);
+      }
+    }
+
+    function selectJob(el, jobName) {
+      selectedJob = jobName;
+      document.querySelectorAll(".recommend-card").forEach(card => card.classList.remove("selected"));
+      el.classList.add("selected");
+      toast("已选择：" + jobName);
+    }
+
+    function showProfileDetail(title, desc) {
+      const card = document.getElementById("profileDetail");
+      card.innerHTML = `
+        <div class="detail-label">个人空间素材</div>
+        <b>${escapeHTML(title)}</b>
+        <p>${escapeHTML(desc)}</p>
+      `;
+    }
+
+    function openBubbleSheet() {
+      document.getElementById("bubbleOverlay").classList.add("show");
+      document.getElementById("bubbleSheet").classList.add("show");
+      setTimeout(() => document.getElementById("bubbleTitleInput").focus(), 220);
+    }
+
+    function closeBubbleSheet() {
+      document.getElementById("bubbleOverlay").classList.remove("show");
+      document.getElementById("bubbleSheet").classList.remove("show");
+    }
+
+    function addNewBubble() {
+      const titleInput = document.getElementById("bubbleTitleInput");
+      const descInput = document.getElementById("bubbleDescInput");
+      const title = titleInput.value.trim() || "新的经历";
+      const desc = descInput.value.trim() || "这里可以记录新的经历、项目、奖项、证书或其他求职素材。";
+
+      const bubble = document.createElement("button");
+      bubble.className = "profile-bubble";
+      bubble.textContent = title;
+      bubble.onclick = function() {
+        showProfileDetail(title, desc);
+      };
+
+      const wrap = document.querySelector(".profile-bubble-wrap");
+      wrap.appendChild(bubble);
+
+      titleInput.value = "";
+      descInput.value = "";
+      closeBubbleSheet();
+      showProfileDetail(title, desc);
+      toast("已添加到个人空间");
+    }
+
+    function escapeHTML(str) {
+      return String(str).replace(/[&<>"']/g, function(match) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        }[match];
+      });
+    }
+
+    let timer;
+    function toast(text) {
+      const el = document.getElementById("toast");
+      el.textContent = text;
+      el.classList.add("show");
+      clearTimeout(timer);
+      timer = setTimeout(() => el.classList.remove("show"), 1700);
+    }
+  </script>
+</body>
+</html>
